@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pious Brothers Community</title>
+    <link rel="stylesheet" href="/pbc.css">
+    <link rel="icon" href="/logoo.jpg" type="image/icon type">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+        
+        <script>
+         const firebaseConfig = {
+      apiKey: "AIzaSyBWbtgmtGHStYogBtd4B6w7HelVr-OoZEE",
+      authDomain: "piousbrothers-c5e99.firebaseapp.com",
+      projectId: "piousbrothers-c5e99",
+      storageBucket: "piousbrothers-c5e99.firebasestorage.app",
+      messagingSenderId: "988225455952",
+      appId: "1:988225455952:web:088c919b1b537caa3e8e55",
+      measurementId: "G-5GYBVCJY9P"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+          const auth = firebase.auth();
+      
+          auth.onAuthStateChanged(user => {
+      if (user) {
+        // User is logged in, now fetch their username
+        db.ref('users/' + user.uid).once('value')
+          .then(snapshot => {
+            const username = snapshot.val().username;
+            document.getElementById("welcomeMessage").innerText = `Welcome, ${username}!`;
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      } else {
+        window.location.href = "/login.html"; // Not logged in, redirect
+      }
+    });
+    
+        </script>
+</head>
+<body class="center1 ilm text-white">
+    <header class="fix">
+        <center>
+            ILM
+        </center><br>
+        <a class="clink" href="/index.html">HOME</a>
+    </header>
+    <br><br><br><br><br><br>
+
+<div class="line9 ">
+    <button class="ilmbtn" onclick="bukhari()"><img class="ilmbtn1" src="bukhari.jpg" alt=""></button>
+    <button class="ilmbtn" onclick="muslim()"><img class="ilmbtn1" src="muslim.jpg" alt=""></button>
+    <button class="ilmbtn" onclick="shafi()"><img class="ilmbtn1" src="shafi.jpg" alt=""></button>
+    <button class="ilmbtn" onclick="hanafi()"><img class="ilmbtn1" src="hanafi.jpg" alt=""></button>
+    <button class="ilmbtn" onclick="hanbali()"><img class="ilmbtn1" src="hanbali.jpg" alt=""></button>
+    <button class="ilmbtn" onclick="maliki()"><img class="ilmbtn1" src="maliki.jpg" alt=""></button>
+</div>
+<center>
+    <p>For books <a href="https://drive.google.com/drive/folders/17O90NqYU708gSzh6lZzxhSHsI5pPPORY">click me</a> </p>
+    <p>For more refference visit <a href="https://sunnah.com">sunnah.com</a> </p>
+</center>
+<script src="/pbc.js"></script>
+</body>
+</html>

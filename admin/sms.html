@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Chat Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <style>
+    body {margin: 0; padding: 0; font-family: Arial, sans-serif; height: 100vh; display: flex; flex-direction: column; background: #f4f4f4;}
+    #container {display: flex; flex: 1; overflow: hidden;}
+    #users {width: 250px; background: #314131; color: white; overflow-y: auto; padding: 20px; box-sizing: border-box;}
+    #chat {flex: 1; display: flex; flex-direction: column; background: #edf1ec;}
+    .userBtn {width: 100%; padding: 10px; margin-bottom: 5px; background: #5a7a61; color: white; border: none; border-radius: 5px; text-align: left; cursor: pointer; position: relative;}
+    .userBtn .badge {background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px; position: absolute; top: 5px; right: 10px;}
+    #messages {flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column;}
+    .message {margin-bottom: 10px; max-width: 60%; padding: 10px; border-radius: 10px; word-wrap: break-word; position: relative;}
+    .userMessage {align-self: flex-start; background: white; color: black;}
+    .adminMessage {align-self: flex-end; background: #1abc9c; color: white;}
+    .deleteBtn {position: absolute; top: 5px; right: 10px; background: none; border: none; color: gray; display: none; cursor: pointer;}
+    .message:hover .deleteBtn {display: block;}
+    #inputArea {display: flex; padding: 10px; background: white; border-top: 1px solid #ccc;}
+    #messageInput {flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #ccc;}
+    #sendBtn, #clearChatBtn {margin-left: 10px; padding: 10px 15px; border: none; border-radius: 20px; background: #1abc35; color: white; cursor: pointer;}
+    #typingIndicator {padding: 5px 15px; font-size: 12px; color: #555;}
+    @media (max-width: 768px) {
+      #container {flex-direction: column;}
+      #users {width: 100%; height: 100px; overflow-x: auto; white-space: nowrap;}
+      .userBtn {display: inline-block; width: auto; margin-right: 10px;}
+    }
+  </style>
+</head>
+<body>
+
+<div id="container">
+  <div id="users"></div>
+  <div id="chat">
+    <div id="messages"></div>
+    <div id="typingIndicator"></div>
+    <div id="inputArea">
+      <input type="text" id="messageInput" placeholder="Type a message...">
+      <button id="sendBtn">Send</button>
+      <button id="clearChatBtn">Clear Chat</button>
+    </div>
+  </div>
+</div>
+
+<audio id="notifSound" src="https://notificationsounds.com/storage/sounds/file-sounds-1156-pristine.mp3" preload="auto"></audio>
+
+<script>
+        const firebaseConfig = {
+  apiKey: "AIzaSyBWbtgmtGHStYogBtd4B6w7HelVr-OoZEE",
+  authDomain: "piousbrothers-c5e99.firebaseapp.com",
+  projectId: "piousbrothers-c5e99",
+  storageBucket: "piousbrothers-c5e99.firebasestorage.app",
+  messagingSenderId: "988225455952",
+  appId: "1:988225455952:web:088c919b1b537caa3e8e55",
+  measurementId: "G-5GYBVCJY9P"
+};
+  firebase.initializeApp(firebaseConfig);
+
+  const db = firebase.database();
+  const auth = firebase.auth();
+  const usersDiv = document.getElementById('users');
+  const messagesDiv = document.getElementById('messages');
+  const messageInput = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const clearChatBtn = document.getElementById('clearChatBtn');
+  const typingIndicator = document.getElementById('typingIndicator');
+
+  let currentUserId = null;
+  let userButtons = {};
+
+  auth.onAuthStateChanged(user => {
+      if (!user) {
+        // No user signed in, redirect to login
+        window.location.href = "login.html";
+      }
+      if(user.email!="piousbrotherscommunity@gmail.com"){
+        window.location.href="login.html"
+      }
+    });
+
+  function createUserButton(userId, username) {
+    const btn = document.createElement('button');
+    btn.className = 'userBtn';
+    btn.id = 'btn-' + userId;
+    btn.innerText = username;
+    btn.onclick = () => selectUser(userId, username);
+    usersDiv.prepend(btn);
+    userButtons[userId] = btn;
+  }
+
+  function selectUser(userId, username) {
+    currentUserId = userId;
+    messagesDiv.innerHTML = '';
+    typingIndicator.innerHTML = '';
+    db.ref('messages/' + userId).off();
+    db.ref('messages/' + userId).on('child_added', snapshot => {
+      const msg = snapshot.val();
+      if (userId !== currentUserId) return;
+      const div = document.createElement('div');
+      div.className = 'message ' + (msg.sender === 'user' ? 'userMessage' : 'adminMessage');
+      div.innerHTML = `
+        ${msg.text}
+        <button class="deleteBtn" onclick="deleteMessage('${userId}', '${snapshot.key}')">✖</button>
+      `;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      if (msg.sender === 'user') {
+        document.getElementById('notifSound').play();
+      }
+    });
+
+    db.ref('typing/' + userId).on('value', snapshot => {
+      const data = snapshot.val();
+      if (data && data.userTyping) {
+        typingIndicator.innerText = username + ' is typing...';
+      } else {
+        typingIndicator.innerText = '';
+      }
+    });
+
+    db.ref('users/' + userId + '/lastSeen').once('value', snap => {
+      if (snap.val()) {
+        const lastSeenTime = new Date(snap.val()).toLocaleTimeString();
+        typingIndicator.innerText += ` (Last seen: ${lastSeenTime})`;
+      }
+    });
+
+    if (userButtons[userId]) {
+      userButtons[userId].querySelector('.badge')?.remove();
+    }
+  }
+
+  sendBtn.onclick = () => {
+    const text = messageInput.value.trim();
+    if (text && currentUserId) {
+      db.ref('messages/' + currentUserId).push({
+        text,
+        sender: 'admin',
+        timestamp: Date.now()
+      });
+      messageInput.value = '';
+    }
+  };
+
+  clearChatBtn.onclick = () => {
+    if (currentUserId && confirm('Clear entire chat?')) {
+      db.ref('messages/' + currentUserId).remove();
+    }
+  };
+
+  function deleteMessage(userId, messageId) {
+    if (confirm('Delete this message?')) {
+      db.ref('messages/' + userId + '/' + messageId).remove();
+    }
+  }
+
+  db.ref('users').on('child_added', snapshot => {
+    const userId = snapshot.key;
+    const user = snapshot.val();
+    if (!userButtons[userId]) {
+      createUserButton(userId, user.username);
+    }
+  });
+
+  db.ref('messages').on('child_added', snapshot => {
+    const userId = snapshot.key;
+    if (currentUserId !== userId && userButtons[userId]) {
+      let badge = userButtons[userId].querySelector('.badge');
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'badge';
+        userButtons[userId].appendChild(badge);
+        usersDiv.prepend(userButtons[userId]);
+      }
+      badge.innerText = (parseInt(badge.innerText) || 0) + 1;
+    }
+  });
+
+  messageInput.addEventListener('input', () => {
+    if (currentUserId) {
+      db.ref('typing/' + currentUserId).update({ adminTyping: messageInput.value.length > 0 });
+    }
+  });
+
+</script>
+
+</body>
+</html>

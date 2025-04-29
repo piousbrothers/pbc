@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Page</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="line2">
+        <a href="bukhari.html"><img src="/ilm/bukhari.jpg" alt="" class="btnn1">
+        </a>
+        <a href="muslim.html"><img src="/ilm/muslim.jpg" alt="" class="btnn1">
+        </a>
+        <a href="shafi.html"><img src="/ilm/shafi.jpg" alt="" class="btnn1">
+        </a>
+        <a href="hanafi.html"><img src="/ilm/hanafi.jpg" alt="" class="btnn1">
+        </a>
+        <a href="hanbali.html"><img src="/ilm/hanbali.jpg" alt="" class="btnn1">
+        </a>
+        <a href="maliki.html"><img src="/ilm/maliki.jpg" alt="" class="btnn1">
+        </a>
+    </div>
+
+
+  <script>
+        const firebaseConfig = {
+  apiKey: "AIzaSyBWbtgmtGHStYogBtd4B6w7HelVr-OoZEE",
+  authDomain: "piousbrothers-c5e99.firebaseapp.com",
+  projectId: "piousbrothers-c5e99",
+  storageBucket: "piousbrothers-c5e99.firebasestorage.app",
+  messagingSenderId: "988225455952",
+  appId: "1:988225455952:web:088c919b1b537caa3e8e55",
+  measurementId: "G-5GYBVCJY9P"
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Check if user is logged in
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        // No user signed in, redirect to login
+        window.location.href = "login.html";
+      }
+      if(user.email!="piousbrotherscommunity@gmail.com"){
+        window.location.href="login.html"
+      }
+    });
+
+    // Logout function
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    }
+  </script>
+</body>
+</html>
