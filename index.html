@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pious Brothers Community</title>
+    <link rel="icon" href="logoo.jpg" type="image/icon type">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: rgb(255, 255, 255);
+            font-family: serif;
+            background-color: #213128;
+        }
+
+        .loading {
+            font-size: 60px;
+            font-weight: bold;
+            display: flex;
+        }
+
+        .loading span {
+            opacity: 0;
+            animation: wave 1.5s infinite;
+        }
+
+        .loading span:nth-child(1) { animation-delay: 0s; }
+        .loading span:nth-child(2) { animation-delay: 0.2s; }
+        .loading span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes wave {
+            0% { opacity: 0; transform: translateY(10px); }
+            50% { opacity: 1; transform: translateY(-10px); }
+            100% { opacity: 0; transform: translateY(10px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <span>P</span>
+        <span>B</span>
+        <span>C</span>
+    </div>
+    <script>
+        setTimeout(() => {
+            window.location.href = "main.html";
+        },2500); 
+    </script>
+   
+</body>
+</html>

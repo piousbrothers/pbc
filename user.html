@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <style>
+    * {margin: 0; padding: 0; box-sizing: border-box;}
+    body {font-family: 'Poppins', sans-serif; background: #f8f9fa; height: 100vh; display: flex; flex-direction: column;}
+    header {background: #28a745; color: white; text-align: center; padding: 15px; font-size: 22px;}
+    #messages {flex: 1; overflow-y: auto; padding: 20px; background: #e9ecef; display: flex; flex-direction: column; gap: 10px;}
+    .message {padding: 12px; border-radius: 15px; max-width: 70%; word-wrap: break-word; font-size: 14px; position: relative;}
+    .adminMessage {align-self: flex-start; background: #ffffff; color: #333;}
+    .userMessage {align-self: flex-end; background: #28a745; color: white;}
+    .deleteBtn {position: absolute; top: 5px; right: 10px; background: none; border: none; color: #888; display: none; cursor: pointer;}
+    .message:hover .deleteBtn {display: block;}
+    #inputArea {display: flex; padding: 10px; background: white; border-top: 1px solid #ccc;}
+    #messageInput {flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #ccc;}
+    #sendBtn, #clearChatBtn {padding: 10px 15px; margin-left: 10px; border: none; border-radius: 20px; background: #28a745; color: white; cursor: pointer;}
+    #typingIndicator {padding: 5px 15px; font-size: 12px; color: #555;}
+    @media(max-width: 768px) {
+      #inputArea {flex-direction: column;}
+      #sendBtn, #clearChatBtn {margin: 10px 0 0;}
+    }
+  </style>
+</head>
+<body>
+
+<header>Ask doubts</header>
+
+<div id="messages"></div>
+
+<div id="typingIndicator"></div>
+
+<div id="inputArea">
+  <input type="text" id="messageInput" placeholder="Type a message...">
+  <button id="sendBtn">Send</button>
+  <button id="clearChatBtn">Clear Chat</button>
+</div>
+
+<audio id="notifSound" src="https://notificationsounds.com/storage/sounds/file-sounds-1156-pristine.mp3" preload="auto"></audio>
+
+<script>
+         const firebaseConfig = {
+  apiKey: "AIzaSyBWbtgmtGHStYogBtd4B6w7HelVr-OoZEE",
+  authDomain: "piousbrothers-c5e99.firebaseapp.com",
+  projectId: "piousbrothers-c5e99",
+  storageBucket: "piousbrothers-c5e99.firebasestorage.app",
+  messagingSenderId: "988225455952",
+  appId: "1:988225455952:web:088c919b1b537caa3e8e55",
+  measurementId: "G-5GYBVCJY9P"
+};
+  firebase.initializeApp(firebaseConfig);
+
+  const db = firebase.database();
+  const auth = firebase.auth();
+  const messagesDiv = document.getElementById('messages');
+  const messageInput = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const clearChatBtn = document.getElementById('clearChatBtn');
+  const typingIndicator = document.getElementById('typingIndicator');
+
+  let currentUserId = null;
+  let username = null;
+
+  auth.onAuthStateChanged(user => {
+    if (!user) window.location.href = "login.html";
+    else {
+      currentUserId = user.uid;
+      db.ref('users/' + currentUserId).update({
+        lastSeen: 'online'
+      });
+
+      db.ref(`messages/${currentUserId}`).on('child_added', snapshot => {
+        const msg = snapshot.val();
+        const div = document.createElement('div');
+        div.className = 'message ' + (msg.sender === 'admin' ? 'adminMessage' : 'userMessage');
+        div.innerHTML = `
+          ${msg.text}
+          ${msg.sender === 'user' ? `<button class="deleteBtn" onclick="deleteMessage('${snapshot.key}')">✖</button>` : ''}
+        `;
+        messagesDiv.appendChild(div);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        document.getElementById('notifSound').play();
+      });
+
+      db.ref('typing/' + currentUserId + '/adminTyping').on('value', snap => {
+        typingIndicator.innerText = snap.val() ? 'Admin is typing...' : '';
+      });
+
+      window.addEventListener('beforeunload', () => {
+        db.ref('users/' + currentUserId).update({
+          lastSeen: Date.now()
+        });
+      });
+    }
+  });
+
+  sendBtn.onclick = () => {
+    const text = messageInput.value.trim();
+    if (text && currentUserId) {
+      db.ref(`messages/${currentUserId}`).push({
+        text,
+        sender: 'user',
+        timestamp: Date.now()
+      });
+      messageInput.value = '';
+    }
+  };
+
+  messageInput.addEventListener('input', () => {
+    if (currentUserId) {
+      db.ref('typing/' + currentUserId).update({ userTyping: messageInput.value.length > 0 });
+    }
+  });
+
+  clearChatBtn.onclick = () => {
+    if (currentUserId && confirm("Clear your chat?")) {
+      db.ref(`messages/${currentUserId}`).remove();
+    }
+  };
+
+  function deleteMessage(messageId) {
+    if (currentUserId && confirm("Delete this message?")) {
+      db.ref(`messages/${currentUserId}/${messageId}`).remove();
+    }
+  }
+</script>
+
+</body>
+</html>

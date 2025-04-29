@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #74eb7e, #e5beac);
+      font-family: 'Poppins', sans-serif;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      animation: slideDown 0.6s ease;
+      width: 300px;
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+
+    input:focus {
+      border-color: #74ebd5;
+      outline: none;
+      box-shadow: 0 0 5px #74ebd5;
+    }
+
+    button {
+      background: #78eb74;
+      color: white;
+      padding: 10px;
+      border: none;
+      width: 100%;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #5ac950;
+    }
+
+    a {
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+    }
+
+    @keyframes slideDown {
+      0% { transform: translateY(-50px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Welcome Back</h2>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button onclick="login()">Login</button>
+    <p style="margin-top: 10px;"><a href="#" onclick="resetPassword()">Forgot Password?</a></p>
+    <p style="margin-top: 10px;">Don't have an account? <a href="signup.html">Sign Up</a></p>
+  </div>
+
+  <script>
+     const firebaseConfig = {
+  apiKey: "AIzaSyBWbtgmtGHStYogBtd4B6w7HelVr-OoZEE",
+  authDomain: "piousbrothers-c5e99.firebaseapp.com",
+  projectId: "piousbrothers-c5e99",
+  storageBucket: "piousbrothers-c5e99.firebasestorage.app",
+  messagingSenderId: "988225455952",
+  appId: "1:988225455952:web:088c919b1b537caa3e8e55",
+  measurementId: "G-5GYBVCJY9P"
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    function login() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+if(email=="piousbrotherscommunity@gmail.com")
+      auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          alert("Login Successful!");
+          window.location.href = "/admin/admin.html";
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+else{
+  auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          alert("Login Successful!");
+          window.location.href = "index.html";
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+}
+    }
+
+    function resetPassword() {
+      const email = prompt("Enter your email for password reset:");
+      if (email) {
+        auth.sendPasswordResetEmail(email)
+          .then(() => {
+            alert("Password reset link sent to your email.");
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Not Found</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap');
+
+body {
+    background-color: #121212;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+/* Error Number */
+.error {
+    font-size: 7rem;
+    font-weight: bold;
+    color: #47ff66;
+    position: relative;
+    display: inline-block;
+}
+
+/* Crying Emoji Animation */
+.crying {
+    display: inline-block;
+    animation: cry 1s infinite alternate;
+}
+
+@keyframes cry {
+    0% { transform: translateY(0px); }
+    100% { transform: translateY(10px); }
+}
+
+/* Glitch Text Effect */
+.glitch-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: inline-block;
+    position: relative;
+    animation: glitch 1.5s infinite alternate-reverse;
+}
+
+@keyframes glitch {
+    0% { text-shadow: 3px 3px 5px #4dff47; }
+    50% { text-shadow: -3px -3px 5px #6bff97; }
+    100% { text-shadow: 3px 3px 5px #4dff47; }
+}
+
+/* Floating Background Numbers */
+.error::before,
+.error::after {
+    content: "404";
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0.1;
+    font-size: 12rem;
+    transform: translate(-20px, -20px) rotate(-10deg);
+}
+
+.error::after {
+    transform: translate(20px, 20px) rotate(10deg);
+}
+
+/* Button */
+.btn {
+    display: inline-block;
+    padding: 12px 25px;
+    margin-top: 20px;
+    background: linear-gradient(45deg, #47ff47, #04830a);
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    box-shadow: 0 0 10px #6bff72;
+    transition: 0.3s ease-in-out;
+}
+
+.btn:hover {
+    background: linear-gradient(45deg, #6bff6b, #03b10c);
+    box-shadow: 0 0 20px #47ff50;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error">4<span class="crying">😢</span>4</div>
+        <p class="glitch-text">Oops! Looks like you're lost in cyberspace.</p>
+        <p>The page you’re looking for has disappeared into the void.</p>
+        <a href="/" class="btn">Take Me Home</a>
+    </div>
+</body>
+</html>
